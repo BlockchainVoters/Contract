@@ -66,8 +66,8 @@ contract Election {
     // any function in the contract only is executed if the election is on
     require(_isOn == true, 'This election is closed by the owner, sorry');
 
-    // the candidate parameters mus be unique
-    Candidate storage current;
+    // the candidate parameters must be unique
+    Candidate memory current;
     uint count = candidates.length;
     for (uint8 i = 0; i < count; i++) {
       current = candidates[i];
@@ -78,17 +78,17 @@ contract Election {
     require(now <= insertLimit, 'The deadline to insert candidates is over');
 
     // adding the candidate to the election's database
-    Candidate storage c;
+    Candidate c;
     c.name = name;
     c.number = number;
     c.party = party;
     c.vice = vice;
-    candidates[candidates.length] = c;
+    candidates.push(c); // this line is the problem
   }
 
   // internal functions
 
-  function _isEqualStrings(string a, string b) internal returns (bool) {
+  function _isEqualStrings(string a, string b) internal pure returns (bool) {
     bytes memory _a = bytes(a);
     bytes memory _b = bytes(b);
 
