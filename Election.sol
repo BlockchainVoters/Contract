@@ -34,6 +34,7 @@ contract Election {
 
   // this variable holds the election's candidates
   mapping(uint8 => Candidate) private candidates;
+  uint8[] private numberList;
   
   // this variable holds the election's votes
   mapping(string => Vote) private votes;
@@ -79,6 +80,19 @@ contract Election {
     candidates[number].number = number;
     candidates[number].vice = vice;
     candidates[number].party = party;
+    numberList.push(number);
+  }
+  
+  function delete_candidate(uint8 number) public {
+      
+    // any function in the contract only is executed if the election is on
+    require(_isOn == true, 'This election is closed by the owner, sorry');
+    
+    // deadlines
+    require(now <= insertLimit, 'The deletion deadline is over'); 
+    
+    // deleting
+    delete candidates[number];
   }
 
   // internal functions
