@@ -11,6 +11,7 @@ contract Election {
   struct Voter {
     address from;
     string _hash;
+    bool voted;
   }
 
   struct Candidate {
@@ -31,6 +32,9 @@ contract Election {
 
   // this variable defines if the contract is running or not
   bool private _isOn;
+
+  // this variable holds the election's candidates
+  Candidate[] private candidates;
 
   // the constructor must receive the election's deadlines:
   // uint256 _insertLimit : the limit to the administrator to insert candidates (the edition limit goes until the first vote enters)
@@ -57,5 +61,50 @@ contract Election {
   }
 
   // this function lets the owner to input candidates into the eldction database
+  function insert_candidate(string name, uint8 number, string party, string vice) public {
+
+    // any function in the contract only is executed if the election is on
+    require(_isOn == true, 'This election is closed by the owner, sorry');
+
+    // the candidate parameters mus be unique
+    Candidate storage current;
+    uint count = candidates.length;
+    for (uint8 i = 0; i < count; i++) {
+      current = candidates[i];
+      require(!_isEqualStrings(current.name, name) && current.number != number && _isEqualStrings(current.party, party) && _isEqualStrings(current.vice, vice), 'Some parameters are repeated, each candidate must be unique');
+    }
+
+    // the election must be inside the supported deadlines
+    require(now <= insertLimit, 'The deadline to insert candidates is over');
+
+    // adding the candidate to the election's database
+    Candidate storage c;
+    c.name = name;
+    c.number = number;
+    c.party = party;
+    c.vice = vice;
+    candidates[candidates.length] = c;
+  }
+
+  // internal functions
+
+  function _isEqualStrings(string a, string b) internal returns (bool) {
+    bytes memory _a = bytes(a);
+    bytes memory _b = bytes(b);
+
+    uint counta = _a.length;
+    uint countb = _b.length;
+
+    if (counta != countb) {
+      return false;
+    } else {
+      for(uint i = 0; i < counta; i++) {
+        if(_a[i] != _b[i]) {
+          return false;
+        }
+      }
+      return true;
+    }
+  }
 
 }
