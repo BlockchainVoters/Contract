@@ -68,6 +68,9 @@ contract Election {
 
   // this function lets the owner to input candidates into the election database
   function insert_candidate(string name, uint8 number, string party, string vice) public {
+      
+    // admin
+    require(msg.sender == owner, 'You do not have permission to execute this route');
 
     // any function in the contract only is executed if the election is on
     require(_isOn == true, 'This election is closed by the owner, sorry');
@@ -83,7 +86,11 @@ contract Election {
     numberList.push(number);
   }
   
+  // this function lets the owner to delete candidates
   function delete_candidate(uint8 number) public {
+      
+    // admin
+    require(msg.sender == owner, 'You do not have permission to execute this route'); 
       
     // any function in the contract only is executed if the election is on
     require(_isOn == true, 'This election is closed by the owner, sorry');
@@ -93,6 +100,27 @@ contract Election {
     
     // deleting
     delete candidates[number];
+  }
+  
+  // this function lets an external account to vote in the election
+  function join_voter(string __hash) public {
+    
+    // not admin
+    require(msg.sender != owner, 'Only voters have permission to execute this route'); 
+      
+    // any function in the contract only is executed if the election is on
+    require(_isOn == true, 'This election is closed by the owner, sorry');
+    
+    // deadlines
+    require(now <= joinLimit, 'The deletion deadline is over'); 
+    
+    // duplicates - an account has as unique id the address and the user hash together (the hash must be unique, like a password)
+    require(voters[msg.sender].from == 0, 'This account has already joined as voter');
+    
+    // joining
+    voters[msg.sender].from = msg.sender;
+    voters[msg.sender]._hash = __hash;
+    voters[msg.sender].voted = false;
   }
 
   // internal functions
