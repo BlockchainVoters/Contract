@@ -108,6 +108,7 @@ contract Election {
   }
 
   // this function lets an external account to join as voter in the election
+  // a voter, once joined, cannot withdraw
   function join_voter(string __hash) public {
 
     // not admin
@@ -130,6 +131,40 @@ contract Election {
     votersByHash[__hash].from = msg.sender;
     votersByHash[__hash]._hash = __hash;
     votersByHash[__hash].voted = false;
+  }
+
+  function vote(uint8 number, string __hash) public {
+
+    // not admin
+    require(msg.sender != owner, 'Only voters have permission to execute this route');
+
+    // any function in the contract only is executed if the election is on
+    require(_isOn == true, 'This election is closed by the owner, sorry');
+
+    // deadlines
+    require(now <= voteLimit, 'The vote deadline is over');
+
+    // joined
+    require(votersByAddress[msg.sender].from != 0, 'This account has not joined as voter with this address');
+    require(votersByHash[__hash].from != 0, 'This account has not joined as voter with this hash');
+
+    // already voted
+    require(!votersByAddress[msg.sender].voted && !votersByHash[__hash].voted, 'You have already voted in this election');
+
+    // valid number
+    require(candidates[number].number != 0, 'This candidate does not exist');
+
+    // vote
+    votesByAddress[msg.sender].from = msg.sender;
+    votesByAddress[msg.sender]._hash = __hash;
+    votesByAddress[msg.sender].candidate = number;
+    votesByHash[__hash].from = msg.sender;
+    votesByHash[__hash]._hash = __hash;
+    votesByHash[__hash].candidate = number;
+
+    // already voted
+    votersByAddress[msg.sender].voted = true;
+    votersByHash[__hash].voted = true;
   }
 
   // internal functions
