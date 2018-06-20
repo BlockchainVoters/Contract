@@ -35,12 +35,14 @@ contract Election {
   // this variable holds the election's candidates
   mapping(uint8 => Candidate) private candidates;
   uint8[] private numberList;
-  
+
   // this variable holds the election's votes
-  mapping(string => Vote) private votes;
-  
-  // this variable holds the election's voters
-  mapping(address => Voter) private voters;
+  mapping(address => Vote) private votesByAddress;
+  mapping(string => Vote) private votesByHash;
+
+  // this variable holds the election's voters (the structures are redundant to ensure the hash is unique)
+  mapping(address => Voter) private votersByAddress;
+  mapping(string => Voter) private votersByHash;
 
   // the constructor must receive the election's deadlines:
   // uint256 _insertLimit : the limit to the administrator to insert candidates (the edition limit goes until the first vote enters)
@@ -68,15 +70,18 @@ contract Election {
 
   // this function lets the owner to input candidates into the election database
   function insert_candidate(string name, uint8 number, string party, string vice) public {
-      
+
     // admin
     require(msg.sender == owner, 'You do not have permission to execute this route');
 
     // any function in the contract only is executed if the election is on
     require(_isOn == true, 'This election is closed by the owner, sorry');
-    
+
     // deadlines
     require(now <= insertLimit, 'The insertion deadline is over');
+
+    // doubles
+    require(candidates[number].number == 0, 'This candidate has already been added. With you want to edit, delete and add again');
 
     // if the candidate's number already exists, it will be overwritten
     candidates[number].name = name;
@@ -85,42 +90,46 @@ contract Election {
     candidates[number].party = party;
     numberList.push(number);
   }
-  
+
   // this function lets the owner to delete candidates
   function delete_candidate(uint8 number) public {
-      
+
     // admin
-    require(msg.sender == owner, 'You do not have permission to execute this route'); 
-      
+    require(msg.sender == owner, 'You do not have permission to execute this route');
+
     // any function in the contract only is executed if the election is on
     require(_isOn == true, 'This election is closed by the owner, sorry');
-    
+
     // deadlines
-    require(now <= insertLimit, 'The deletion deadline is over'); 
-    
+    require(now <= insertLimit, 'The deletion deadline is over');
+
     // deleting
     delete candidates[number];
   }
-  
-  // this function lets an external account to vote in the election
+
+  // this function lets an external account to join as voter in the election
   function join_voter(string __hash) public {
-    
+
     // not admin
-    require(msg.sender != owner, 'Only voters have permission to execute this route'); 
-      
+    require(msg.sender != owner, 'Only voters have permission to execute this route');
+
     // any function in the contract only is executed if the election is on
     require(_isOn == true, 'This election is closed by the owner, sorry');
-    
+
     // deadlines
-    require(now <= joinLimit, 'The deletion deadline is over'); 
-    
-    // duplicates - an account has as unique id the address and the user hash together (the hash must be unique, like a password)
-    require(voters[msg.sender].from == 0, 'This account has already joined as voter');
-    
+    require(now <= joinLimit, 'The join deadline is over');
+
+    // duplicates - an account has as unique id the address and the user hash together (the hash should be unique, like a password)
+    require(votersByAddress[msg.sender].from == 0, 'This account has already joined as voter with this address');
+    require(votersByHash[__hash].from == 0, 'An account has already joined as voter with this hash');
+
     // joining
-    voters[msg.sender].from = msg.sender;
-    voters[msg.sender]._hash = __hash;
-    voters[msg.sender].voted = false;
+    votersByAddress[msg.sender].from = msg.sender;
+    votersByAddress[msg.sender]._hash = __hash;
+    votersByAddress[msg.sender].voted = false;
+    votersByHash[__hash].from = msg.sender;
+    votersByHash[__hash]._hash = __hash;
+    votersByHash[__hash].voted = false;
   }
 
   // internal functions
