@@ -3,14 +3,12 @@ pragma solidity ^0.4.24;
 contract Election {
 
   struct Vote {
-    address from;
     string _hash;
     uint8 candidate;
   }
 
   struct Voter {
     address from;
-    string _hash;
     bool voted;
   }
 
@@ -37,13 +35,11 @@ contract Election {
   uint8[] private numberList;
 
   // this variable holds the election's votes
-  mapping(address => Vote) private votesByAddress;
-  mapping(string => Vote) private votesByHash;
+  mapping(string => Vote) private votes;
   uint8[] private votesList;
 
   // this variable holds the election's voters (the structures are redundant to ensure the hash is unique)
-  mapping(address => Voter) private votersByAddress;
-  mapping(string => Voter) private votersByHash;
+  mapping(address => Voter) private voters;
   address[] private votersList;
 
   // the constructor must receive the election's deadlines:
@@ -111,7 +107,7 @@ contract Election {
 
   // this function lets an external account to join as voter in the election
   // a voter, once joined, cannot withdraw
-  function join_voter(string __hash) public {
+  function join_voter() public {
 
     // not admin
     require(msg.sender != owner, 'Only voters have permission to execute this route');
@@ -123,16 +119,11 @@ contract Election {
     require(now <= joinLimit, 'The join deadline is over');
 
     // duplicates - an account has as unique id the address and the user hash together (the hash should be unique, like a password)
-    require(votersByAddress[msg.sender].from == 0, 'This account has already joined as voter with this address');
-    require(votersByHash[__hash].from == 0, 'An account has already joined as voter with this hash');
+    require(voters[msg.sender].from == 0, 'This account has already joined as voter with this address');
 
     // joining
-    votersByAddress[msg.sender].from = msg.sender;
-    votersByAddress[msg.sender]._hash = __hash;
-    votersByAddress[msg.sender].voted = false;
-    votersByHash[__hash].from = msg.sender;
-    votersByHash[__hash]._hash = __hash;
-    votersByHash[__hash].voted = false;
+    voters[msg.sender].from = msg.sender;
+    voters[msg.sender].voted = false;
 
     votersList.push(msg.sender);
   }
@@ -150,26 +141,20 @@ contract Election {
     require(now <= voteLimit, 'The vote deadline is over');
 
     // joined
-    require(votersByAddress[msg.sender].from != 0, 'This account has not joined as voter with this address');
-    require(votersByHash[__hash].from != 0, 'This account has not joined as voter with this hash');
+    require(voters[msg.sender].from != 0, 'This account has not joined as voter with this address');
 
     // already voted
-    require(!votersByAddress[msg.sender].voted && !votersByHash[__hash].voted, 'You have already voted in this election');
+    require(!voters[msg.sender].voted, 'You have already voted in this election');
 
     // valid number
     require(candidates[number].number != 0, 'This candidate does not exist');
 
-    // vote
-    votesByAddress[msg.sender].from = msg.sender;
-    votesByAddress[msg.sender]._hash = __hash;
-    votesByAddress[msg.sender].candidate = number;
-    votesByHash[__hash].from = msg.sender;
-    votesByHash[__hash]._hash = __hash;
-    votesByHash[__hash].candidate = number;
+    // vote;
+    votes[__hash]._hash = __hash;
+    votes[__hash].candidate = number;
 
     // already voted
-    votersByAddress[msg.sender].voted = true;
-    votersByHash[__hash].voted = true;
+    voters[msg.sender].voted = true;
 
     votesList.push(number);
   }
@@ -184,15 +169,15 @@ contract Election {
   }
 
   // this function returns your joining status
-  function has_joined(string __hash) public view returns (bool) {
-    require(msg.sender != owner, 'Only voters have permission to execute this route');
-    return (votersByAddress[msg.sender].from != 0) && (votersByHash[__hash].from != 0);
+  function has_joined() public view returns (bool) {
+    require(msg.sender != owner, 'Only voters have permission to execute this route');  
+    return (voters[msg.sender].from != 0);
   }
 
   // this function returns your voting status
-  function has_voted(string __hash) public view returns (bool) {
+  function has_voted() public view returns (bool) {
     require(msg.sender != owner, 'Only voters have permission to execute this route');
-    return (votersByAddress[msg.sender].voted) && (votersByHash[__hash].voted);
+    return voters[msg.sender].voted;
   }
 
   // this function returns the votes
@@ -203,14 +188,7 @@ contract Election {
   // this function allows you to check your vote
   function check_vote(string __hash) public view returns (uint8) {
     require(msg.sender != owner, 'Only voters have permission to execute this route');
-    require(votesByAddress[msg.sender].from == votesByHash[__hash].from, 'Incompatible hash');
-    return votesByHash[__hash].candidate;
+    require(votes[__hash].candidate != 0, 'This hash has not voted');
+    return votes[__hash].candidate;
   }
-
-  // internal functions
-
-  function any_value() public pure returns (bool) {
-      return true;
-  }
-
 }
