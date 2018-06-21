@@ -39,10 +39,12 @@ contract Election {
   // this variable holds the election's votes
   mapping(address => Vote) private votesByAddress;
   mapping(string => Vote) private votesByHash;
+  uint8[] private votesList;
 
   // this variable holds the election's voters (the structures are redundant to ensure the hash is unique)
   mapping(address => Voter) private votersByAddress;
   mapping(string => Voter) private votersByHash;
+  address[] private votersList;
 
   // the constructor must receive the election's deadlines:
   // uint256 _insertLimit : the limit to the administrator to insert candidates (the edition limit goes until the first vote enters)
@@ -131,8 +133,11 @@ contract Election {
     votersByHash[__hash].from = msg.sender;
     votersByHash[__hash]._hash = __hash;
     votersByHash[__hash].voted = false;
+
+    votersList.push(msg.sender);
   }
 
+  // this function allows you to vote
   function vote(uint8 number, string __hash) public {
 
     // not admin
@@ -165,8 +170,47 @@ contract Election {
     // already voted
     votersByAddress[msg.sender].voted = true;
     votersByHash[__hash].voted = true;
+
+    votesList.push(number);
+  }
+
+  // this function returns the candidates stored in the Election
+  function get_candidates() public view returns (uint8[]) {
+    return numberList;
+  }
+
+  function get_candidate(uint8 number) public view returns (string, uint8, string, string) {
+    return (candidates[number].name, candidates[number].number, candidates[number].party, candidates[number].vice);
+  }
+
+  // this function returns your joining status
+  function has_joined(string __hash) public view returns (bool) {
+    require(msg.sender != owner, 'Only voters have permission to execute this route');
+    return (votersByAddress[msg.sender].from != 0) && (votersByHash[__hash].from != 0);
+  }
+
+  // this function returns your voting status
+  function has_voted(string __hash) public view returns (bool) {
+    require(msg.sender != owner, 'Only voters have permission to execute this route');
+    return (votersByAddress[msg.sender].voted) && (votersByHash[__hash].voted);
+  }
+
+  // this function returns the votes
+  function get_votes() public view returns (uint8[]) {
+    return votesList;
+  }
+
+  // this function allows you to check your vote
+  function check_vote(string __hash) public view returns (uint8) {
+    require(msg.sender != owner, 'Only voters have permission to execute this route');
+    require(votesByAddress[msg.sender].from == votesByHash[__hash].from, 'Incompatible hash');
+    return votesByHash[__hash].candidate;
   }
 
   // internal functions
+
+  function any_value() public pure returns (bool) {
+      return true;
+  }
 
 }
