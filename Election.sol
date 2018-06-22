@@ -67,7 +67,7 @@ contract Election {
   }
 
   // this function lets the owner to input candidates into the election database
-  function insert_candidate(string name, uint8 number, string party, string vice) public {
+  function insert_candidate(string name, uint8 number, string party, string vice) public returns (bool success) {
 
     // admin
     require(msg.sender == owner, 'You do not have permission to execute this route');
@@ -88,10 +88,12 @@ contract Election {
     candidates[number].vice = vice;
     candidates[number].party = party;
     numberList.push(number);
+
+    return true;
   }
 
   // this function lets the owner to delete candidates
-  function delete_candidate(uint8 number) public {
+  function delete_candidate(uint8 number) public returns (bool success) {
 
     // admin
     require(msg.sender == owner, 'You do not have permission to execute this route');
@@ -104,11 +106,13 @@ contract Election {
 
     // deleting
     delete candidates[number];
+
+    return true;
   }
 
   // this function lets an external account to join as voter in the election
   // a voter, once joined, cannot withdraw
-  function join_voter() public {
+  function join_voter() public returns (bool success) {
 
     // not admin
     require(msg.sender != owner, 'Only voters have permission to execute this route');
@@ -127,10 +131,12 @@ contract Election {
     voters[msg.sender].voted = false;
 
     votersList.push(msg.sender);
+
+    return true;
   }
 
   // this function allows you to vote
-  function vote(uint8 number, string __hash) public {
+  function vote(uint8 number, string __hash) public returns (bool success) {
 
     // not admin
     require(msg.sender != owner, 'Only voters have permission to execute this route');
@@ -158,6 +164,8 @@ contract Election {
     voters[msg.sender].voted = true;
 
     votesList.push(number);
+
+    return true;
   }
 
   // this function returns the candidates stored in the Election
@@ -171,7 +179,7 @@ contract Election {
 
   // this function returns your joining status
   function has_joined() public view returns (bool) {
-    require(msg.sender != owner, 'Only voters have permission to execute this route');  
+    require(msg.sender != owner, 'Only voters have permission to execute this route');
     return (voters[msg.sender].from != 0);
   }
 
