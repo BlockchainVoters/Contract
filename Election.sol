@@ -35,7 +35,7 @@ contract Election {
   uint8[] private numberList;
 
   // this variable holds the election's votes
-  /* mapping(string => Vote) private votes; */ // will be kept apart while we can't find a better solution
+  mapping(string => Vote) private votes;
   uint8[] private votesList;
 
   // this variable holds the election's voters (the structures are redundant to ensure the hash is unique)
@@ -157,8 +157,8 @@ contract Election {
     require(candidates[number].number != 0, 'This candidate does not exist');
 
     // vote;
-    /* votes[__hash]._hash = __hash;
-    votes[__hash].candidate = number; */ // will be kept apart while we can find a safer method
+    votes[__hash]._hash = __hash;
+    votes[__hash].candidate = number;
     votesList.push(number);
 
     // already voted
@@ -194,9 +194,9 @@ contract Election {
   }
 
   // this function allows you to check your vote
-  /* function check_vote(string __hash) public view returns (uint8) {
+  function check_vote(string __hash) public view returns (uint8) {
     require(msg.sender != owner, 'Only voters have permission to execute this route');
     require(votes[__hash].candidate != 0, 'This hash has not voted');
     return votes[__hash].candidate;
-  } */ // this method is still insecure to the election's context
+  }
 }
