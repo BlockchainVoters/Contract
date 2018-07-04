@@ -1,4 +1,4 @@
-pragma solidity ^0.4.24;
+pragma solidity ^0.4.20;
 
 contract Election {
 
@@ -67,7 +67,7 @@ contract Election {
   }
 
   // this function lets the owner to input candidates into the election database
-  function insert_candidate(string name, uint8 number, string party, string vice) public returns (bool success) {
+  function insert_candidate(string name, uint8 number, string party, string vice) public {
 
     // admin
     require(msg.sender == owner, 'You do not have permission to execute this route');
@@ -88,12 +88,10 @@ contract Election {
     candidates[number].vice = vice;
     candidates[number].party = party;
     numberList.push(number);
-
-    return true;
   }
 
   // this function lets the owner to delete candidates
-  function delete_candidate(uint8 number) public returns (bool success) {
+  function delete_candidate(uint8 number) public {
 
     // admin
     require(msg.sender == owner, 'You do not have permission to execute this route');
@@ -106,13 +104,11 @@ contract Election {
 
     // deleting
     delete candidates[number];
-
-    return true;
   }
 
   // this function lets an external account to join as voter in the election
   // a voter, once joined, cannot withdraw
-  function join_voter() public returns (bool success) {
+  function join_voter() public {
 
     // not admin
     require(msg.sender != owner, 'Only voters have permission to execute this route');
@@ -131,12 +127,10 @@ contract Election {
     voters[msg.sender].voted = false;
 
     votersList.push(msg.sender);
-
-    return true;
   }
 
   // this function allows you to vote
-  function vote(uint8 number, string __hash) public returns (bool success) {
+  function vote(uint8 number, string __hash) public {
 
     // not admin
     require(msg.sender != owner, 'Only voters have permission to execute this route');
@@ -159,12 +153,11 @@ contract Election {
     // vote;
     votes[__hash]._hash = __hash;
     votes[__hash].candidate = number;
-    votesList.push(number);
 
     // already voted
     voters[msg.sender].voted = true;
 
-    return true;
+    votesList.push(number);
   }
 
   // this function returns the candidates stored in the Election
@@ -178,7 +171,7 @@ contract Election {
 
   // this function returns your joining status
   function has_joined() public view returns (bool) {
-    require(msg.sender != owner, 'Only voters have permission to execute this route');
+    require(msg.sender != owner, 'Only voters have permission to execute this route');  
     return (voters[msg.sender].from != 0);
   }
 
