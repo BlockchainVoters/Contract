@@ -78,7 +78,7 @@ contract Election {
 
     // deadlines
     require(now <= insertLimit, 'The insertion deadline is over');
-    require(votesList.length == 0, 'The voting already started, you cannot add candidates, only delete them');
+    require(votesList.length == 0, 'The voting already started, you cannot add more candidates');
 
     // doubles
     require(candidates[number].number == 0, 'This candidate has already been added. With you want to edit, delete and add again');
@@ -105,6 +105,7 @@ contract Election {
 
     // deadlines
     require(now <= insertLimit, 'The deletion deadline is over');
+    require(votesList.length == 0, 'The voting already started, you cannot delete candidates');
 
     // deleting
     delete candidates[number];
