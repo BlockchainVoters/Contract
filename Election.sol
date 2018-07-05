@@ -36,6 +36,7 @@ contract Election {
 
   // this variable holds the election's votes
   mapping(string => Vote) private votes;
+  mapping(uint8 => uint256) private appuration;
   uint8[] private votesList;
 
   // this variable holds the election's voters (the structures are redundant to ensure the hash is unique)
@@ -88,6 +89,9 @@ contract Election {
     candidates[number].vice = vice;
     candidates[number].party = party;
     numberList.push(number);
+
+    // start candidate's personal vote appuration
+    appuration[number] = 0;
   }
 
   // this function lets the owner to delete candidates
@@ -104,6 +108,7 @@ contract Election {
 
     // deleting
     delete candidates[number];
+    delete appuration[number];
   }
 
   // this function lets an external account to join as voter in the election
@@ -158,6 +163,9 @@ contract Election {
     voters[msg.sender].voted = true;
 
     votesList.push(number);
+
+    // appuration
+    appuration[number] = appuration[number] + 1;
   }
 
   // this function returns the candidates stored in the Election
@@ -167,6 +175,11 @@ contract Election {
 
   function get_candidate(uint8 number) public view returns (string, uint8, string, string) {
     return (candidates[number].name, candidates[number].number, candidates[number].party, candidates[number].vice);
+  }
+
+  // this function returns the candidate's appuration
+  function get_appuration(uint8 candidate) public view returns (uint256) {
+    return appuration[candidate];
   }
 
   // this function returns your joining status
