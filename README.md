@@ -99,6 +99,12 @@ function get_candidates() public view returns (uint8[])
 Este método retorna uma lista dos números de chapa de candidatos cadastrados na eleição.
 
 ```
+function get_appuration(uint8 candidate) public view returns (uint256)
+```
+
+Este método retorna a apuração de votos por candidatos.
+
+```
 function get_candidate(uint8 number) public view returns (string, uint8, string, string)
 ```
 
