@@ -46,7 +46,7 @@ Este método permite ao administrador encerrar o processo eleitoral, que ficará
 ### Inserção de Candidatos (Admin)
 
 ```
-function insert_candidate(string name, uint8 number, string party, string vice)
+function insert_candidate(string name, uint8 number, string party, string vice, string candidate_pic, string vice_pic)
 ```
 
 Este método permite ao administrador inserir candidatos no processo eleitoral, dados os prazos. Caso alguém já tenha votado, ele não poderá inserir mais candidatos.
@@ -55,6 +55,8 @@ O parâmetro `name` representa o nome do candidato a ser inserido.
 O parâmetro `number` representa o número da chapa do candidato, e deve ser **único**.
 O parâmetro `party` representa o partido do candidato.
 O parâmetro `vice` representa o nome do vice do candidato.
+O parâmetro `candidate_pic` representa o identificador IPFS da foto do candidato.
+O parâmetro `vice_pic` representa o identificador IPFS da foto do vice.
 
 ### Exclusão de Candidatos (Admin)
 
@@ -109,6 +111,18 @@ function get_candidate(uint8 number) public view returns (string, uint8, string,
 ```
 
 Este método retorna, dado o número de chapa `number`, os dados completos do candidato cadastrado.
+
+```
+function get_candidate_pic(uint8 number) public view returns (string)
+```
+
+Este método retorna, dado o número de chapa `number`, o identificador IPFS da foto do candidato.
+
+```
+function get_vice_pic(uint8 number) public view returns (string)
+```
+
+Este método retorna, dado o número de chapa `number`, o identificador IPFS da foto do vice.
 
 ```
 function has_joined() public view returns (bool)
