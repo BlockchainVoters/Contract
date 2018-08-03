@@ -17,6 +17,8 @@ contract Election {
     uint8 number;
     string party;
     string vice;
+    string candidate_pic;
+    string vice_pic;
   }
 
   // this variable holds the constracts creator, which is the election's administrator
@@ -68,7 +70,7 @@ contract Election {
   }
 
   // this function lets the owner to input candidates into the election database
-  function insert_candidate(string name, uint8 number, string party, string vice) public {
+  function insert_candidate(string name, uint8 number, string party, string vice, string candidate_pic, string vice_pic) public {
 
     // admin
     require(msg.sender == owner, 'You do not have permission to execute this route');
@@ -88,6 +90,8 @@ contract Election {
     candidates[number].number = number;
     candidates[number].vice = vice;
     candidates[number].party = party;
+    candidates[number].candidate_pic = candidate_pic;
+    candidates[number].vice_pic = vice_pic;
     numberList.push(number);
 
     // start candidate's personal vote appuration
@@ -176,6 +180,14 @@ contract Election {
 
   function get_candidate(uint8 number) public view returns (string, uint8, string, string) {
     return (candidates[number].name, candidates[number].number, candidates[number].party, candidates[number].vice);
+  }
+  
+  function get_candidate_pic(uint8 number) public view returns (string) {
+      return candidates[number].candidate_pic;
+  }
+  
+  function get_vice_pic(uint8 number) public view returns (string) {
+      return candidates[number].vice_pic;
   }
 
   // this function returns the candidate's appuration
